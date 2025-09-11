@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Lectra File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CORS Test - Lectra File Upload</h1>
+        <p>This page tests if the CORS fix is working correctly for your file upload feature.</p>
+        
+        <!-- Test 1: Simple CORS Check -->
+        <div class="test-section info">
+            <h3>Test 1: CORS Preflight Check</h3>
+            <p>This tests if the backend responds correctly to CORS preflight requests.</p>
+            <button onclick="testCorsPreflight()">Test CORS Preflight</button>
+            <div id="cors-result" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Test 2: File Upload Test -->
+        <div class="test-section info">
+            <h3>Test 2: File Upload Test</h3>
+            <p>Select a PDF file and test the actual upload functionality.</p>
+            <input type="file" id="testFile" accept="application/pdf">
+            <button onclick="testFileUpload()" id="uploadBtn">Test File Upload</button>
+            <div id="upload-result" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- Test 3: Backend Health Check -->
+        <div class="test-section info">
+            <h3>Test 3: Backend Health Check</h3>
+            <p>Check if the backend is running and accessible.</p>
+            <button onclick="testBackendHealth()">Check Backend Health</button>
+            <div id="health-result" class="response" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test 1: CORS Preflight Check
+        async function testCorsPreflight() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing CORS preflight...';
+            
+            try {
+                // This will trigger a CORS preflight request
+                const response = await fetch('http://localhost:8000/process', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                resultDiv.textContent = `✅ CORS Preflight Successful!\n\nStatus: ${response.status}\nHeaders:\n${JSON.stringify(headers, null, 2)}`;
+                resultDiv.parentElement.className = 'test-section success';
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ CORS Preflight Failed!\n\nError: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        // Test 2: File Upload Test
+        async function testFileUpload() {
+            const fileInput = document.getElementById('testFile');
+            const resultDiv = document.getElementById('upload-result');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a PDF file first!');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Uploading file...';
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch('http://localhost:8000/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                resultDiv.textContent = `✅ File Upload Successful!\n\nResponse:\n${JSON.stringify(result, null, 2)}`;
+                resultDiv.parentElement.className = 'test-section success';
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ File Upload Failed!\n\nError: ${error.message}`;
+                resultDiv.parentElement.className = 'test-section error';
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Test File Upload';
+            }
+        }
+
+        // Test 3: Backend Health Check
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Checking backend health...';
+            
+            try {
+                // Try to access the FastAPI docs endpoint
+                const response = await fetch('http://localhost:8000/docs', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    resultDiv.textContent = `✅ Backend is running!\n\nStatus: ${response.status}\nURL: http://localhost:8000/docs\n\nYou can visit the FastAPI docs at: http://localhost:8000/docs`;
+                    resultDiv.parentElement.className = 'test-section success';
+                } else {
+                    resultDiv.textContent = `⚠️ Backend responded but with status: ${response.status}`;
+                    resultDiv.parentElement.className = 'test-section error';
+                }
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Backend is not accessible!\n\nError: ${error.message}\n\nMake sure your backend is running on http://localhost:8000`;
+                resultDiv.parentElement.className = 'test-section error';
+            }
+        }
+
+        // Auto-run health check when page loads
+        window.addEventListener('load', function() {
+            setTimeout(testBackendHealth, 1000);
+        });
+    </script>
+</body>
+</html>

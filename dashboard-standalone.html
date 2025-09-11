@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectra Dashboard</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 50%, #f0f8ff 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e0f2fe;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .logo:hover {
+            color: #1d4ed8;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+
+        .btn:hover {
+            background: #f0f8ff;
+            border-color: #93c5fd;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Create Quiz Button */
+        .create-quiz-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .create-quiz-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-size: 1.125rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .create-quiz-btn:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Quizzes Section */
+        .quizzes-section h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+
+        .quizzes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Quiz Card */
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e0f2fe;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .quiz-card:hover {
+            border-color: #bfdbfe;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+        }
+
+        .quiz-card:nth-child(1) { animation-delay: 0.1s; }
+        .quiz-card:nth-child(2) { animation-delay: 0.2s; }
+        .quiz-card:nth-child(3) { animation-delay: 0.3s; }
+        .quiz-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .quiz-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            transition: color 0.2s ease;
+        }
+
+        .quiz-card:hover .quiz-title {
+            color: #2563eb;
+        }
+
+        .quiz-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .status-published {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .status-completed {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+
+        .quiz-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn-outline {
+            border: 1px solid #bfdbfe;
+            color: #2563eb;
+            background: transparent;
+        }
+
+        .action-btn-outline:hover {
+            background: #f0f8ff;
+            border-color: #93c5fd;
+        }
+
+        .action-btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+
+        .action-btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        /* Loading State */
+        .loading-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .loading-card {
+            background: white;
+            border: 1px solid #e0f2fe;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .loading-line {
+            height: 1rem;
+            background: #e5e7eb;
+            border-radius: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .loading-line.short { width: 75%; }
+        .loading-line.medium { width: 50%; }
+        .loading-line.long { width: 100%; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .quizzes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quiz-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Lectra</a>
+            <div class="nav-links">
+                <a href="#about" class="nav-link">About Us</a>
+                <a href="#" class="btn">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Welcome to Your Dashboard</h1>
+            <p>Create, manage, and track your quizzes all in one place. Build engaging learning experiences for your students.</p>
+        </div>
+
+        <!-- Create Quiz Button -->
+        <div class="create-quiz-section">
+            <a href="#create-quiz" class="create-quiz-btn">
+                ✨ Create New Quiz →
+            </a>
+        </div>
+
+        <!-- Quizzes Section -->
+        <div class="quizzes-section">
+            <h2>Your Quizzes</h2>
+            
+            <!-- Loading State (shown initially) -->
+            <div id="loading-state" class="loading-grid">
+                <div class="loading-card">
+                    <div class="loading-line short"></div>
+                    <div class="loading-line medium"></div>
+                    <div class="loading-line long"></div>
+                    <div class="loading-line medium"></div>
+                </div>
+                <div class="loading-card">
+                    <div class="loading-line short"></div>
+                    <div class="loading-line medium"></div>
+                    <div class="loading-line long"></div>
+                    <div class="loading-line medium"></div>
+                </div>
+                <div class="loading-card">
+                    <div class="loading-line short"></div>
+                    <div class="loading-line medium"></div>
+                    <div class="loading-line long"></div>
+                    <div class="loading-line medium"></div>
+                </div>
+            </div>
+
+            <!-- Quizzes Grid (shown after loading) -->
+            <div id="quizzes-grid" class="quizzes-grid" style="display: none;">
+                <!-- Quiz cards will be populated by JavaScript -->
+            </div>
+
+            <!-- Empty State (shown when no quizzes) -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📝</div>
+                <h3>No quizzes yet</h3>
+                <p>Create your first quiz to get started with Lectra</p>
+                <a href="#create-quiz" class="action-btn action-btn-primary">Create Your First Quiz</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample quiz data - in a real app, this would come from an API
+        const sampleQuizzes = [
+            {
+                id: "1",
+                title: "Introduction to Machine Learning",
+                dateCreated: "2024-01-15",
+                questionCount: 12,
+                status: "published",
+                description: "Basic concepts and algorithms in machine learning"
+            },
+            {
+                id: "2", 
+                title: "Web Development Fundamentals",
+                dateCreated: "2024-01-12",
+                questionCount: 8,
+                status: "draft",
+                description: "HTML, CSS, and JavaScript basics"
+            },
+            {
+                id: "3",
+                title: "Database Design Principles",
+                dateCreated: "2024-01-10",
+                questionCount: 15,
+                status: "completed",
+                description: "Relational database concepts and normalization"
+            },
+            {
+                id: "4",
+                title: "React Component Lifecycle",
+                dateCreated: "2024-01-08",
+                questionCount: 6,
+                status: "published",
+                description: "Understanding React hooks and component states"
+            }
+        ];
+
+        // Function to format the date in a user-friendly way
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Function to get status badge HTML
+        function getStatusBadge(status) {
+            const statusClasses = {
+                published: 'status-published',
+                draft: 'status-draft',
+                completed: 'status-completed'
+            };
+            
+            return `<span class="status-badge ${statusClasses[status]}">${status}</span>`;
+        }
+
+        // Function to create a quiz card HTML
+        function createQuizCard(quiz) {
+            return `
+                <div class="quiz-card">
+                    <div class="quiz-header">
+                        <div>
+                            <h3 class="quiz-title">${quiz.title}</h3>
+                            <p class="quiz-description">${quiz.description}</p>
+                        </div>
+                        ${getStatusBadge(quiz.status)}
+                    </div>
+                    
+                    <div class="quiz-stats">
+                        <span>📅 ${formatDate(quiz.dateCreated)}</span>
+                        <span>❓ ${quiz.questionCount} questions</span>
+                    </div>
+                    
+                    <div class="quiz-actions">
+                        <a href="#edit-${quiz.id}" class="action-btn action-btn-outline">Edit</a>
+                        <a href="#view-${quiz.id}" class="action-btn action-btn-primary">View</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to render quizzes
+        function renderQuizzes(quizzes) {
+            const loadingState = document.getElementById('loading-state');
+            const quizzesGrid = document.getElementById('quizzes-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            // Hide loading state
+            loadingState.style.display = 'none';
+
+            if (quizzes.length === 0) {
+                // Show empty state
+                emptyState.style.display = 'block';
+            } else {
+                // Show quizzes grid
+                quizzesGrid.style.display = 'grid';
+                quizzesGrid.innerHTML = quizzes.map(createQuizCard).join('');
+            }
+        }
+
+        // Simulate loading data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a small delay to show the loading animation
+            setTimeout(() => {
+                renderQuizzes(sampleQuizzes);
+            }, 1000);
+        });
+
+        // Add click handlers for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle create quiz button clicks
+            const createQuizBtns = document.querySelectorAll('a[href="#create-quiz"]');
+            createQuizBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Create Quiz functionality would be implemented here!');
+                });
+            });
+
+            // Handle quiz action buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.action-btn')) {
+                    e.preventDefault();
+                    const href = e.target.getAttribute('href');
+                    if (href.startsWith('#edit-')) {
+                        alert('Edit quiz functionality would be implemented here!');
+                    } else if (href.startsWith('#view-')) {
+                        alert('View quiz functionality would be implemented here!');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

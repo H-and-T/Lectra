@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.uploading {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Lecture - Test Page</h1>
+        <p>This is a simple HTML test page to verify your PDF upload functionality works correctly.</p>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="pdfFile">Select PDF File:</label>
+                <input type="file" id="pdfFile" accept="application/pdf" required>
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Submit Lecture</button>
+            <button type="button" id="clearBtn">Clear</button>
+        </form>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('pdfFile');
+        const submitBtn = document.getElementById('submitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusDiv = document.getElementById('status');
+        const fileInfoDiv = document.getElementById('fileInfo');
+
+        // Show file information when a file is selected
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Show file details
+                fileInfoDiv.innerHTML = `
+                    <strong>Selected File:</strong> ${file.name}<br>
+                    <strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                    <strong>Type:</strong> ${file.type}
+                `;
+                fileInfoDiv.style.display = 'block';
+                
+                // Hide any previous status messages
+                statusDiv.style.display = 'none';
+            } else {
+                fileInfoDiv.style.display = 'none';
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async function(e) {
+            // Prevent the form from submitting normally
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                showStatus('Please select a PDF file first.', 'error');
+                return;
+            }
+
+            // Check if it's a PDF file
+            if (file.type !== 'application/pdf') {
+                showStatus('Please select a PDF file only.', 'error');
+                return;
+            }
+
+            // Show uploading status
+            showStatus('Uploading your lecture...', 'uploading');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            try {
+                // Create FormData object to send the file
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Send the file to the backend
+                const response = await fetch('http://localhost:8000/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Check if the request was successful
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Parse the JSON response
+                const result = await response.json();
+
+                // Check if the backend returned an error
+                if (result.status === 'error') {
+                    throw new Error(result.error || 'Upload failed');
+                }
+
+                // Success!
+                showStatus(`Success! Your lecture "${result.filename}" has been uploaded. Job ID: ${result.jobId}`, 'success');
+                
+                // Clear the form
+                fileInput.value = '';
+                fileInfoDiv.style.display = 'none';
+
+            } catch (error) {
+                // Handle errors
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error('Upload error:', error);
+            } finally {
+                // Re-enable the submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Lecture';
+            }
+        });
+
+        // Clear button functionality
+        clearBtn.addEventListener('click', function() {
+            fileInput.value = '';
+            fileInfoDiv.style.display = 'none';
+            statusDiv.style.display = 'none';
+        });
+
+        // Function to show status messages
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
