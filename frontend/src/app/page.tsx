@@ -45,6 +45,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file); // "file" matches what the backend expects
 
+      console.log(formData);
       // Send the file to the backend using fetch
       const response = await fetch("http://localhost:8000/process", {
         method: "POST", // Use POST method for file uploads
@@ -52,6 +53,7 @@ export default function Home() {
         // Don't set Content-Type header - let the browser set it automatically
         // This is important for file uploads with FormData
       });
+      console.log(response);
 
       // Check if the request was successful
       if (!response.ok) {
