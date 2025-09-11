@@ -15,7 +15,14 @@ class ProcessRequest(BaseModel):
 @router.post("/process")
 def create_process(req: ProcessRequest):
     job_id = str(uuid4())
-    return {"jobId": job_id}
+    print(req.model_dump())  # <- actual data
+
+    return {"status": 200, "jobId": job_id}
+
+
+
+
+    #return {"jobId": job_id}
 
 
 @router.get("/jobs/{id}")
