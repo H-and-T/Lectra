@@ -140,7 +140,7 @@ export default function DashboardPage() {
 
         {/* Create Quiz Button */}
         <div className="text-center mb-12">
-          <Link href="/create-quiz">
+          <Link href="/upload">
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out"
