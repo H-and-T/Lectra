@@ -8,5 +8,5 @@ dist
 .next
 out
 .turbo
-backend/uploads
+uploads
 
